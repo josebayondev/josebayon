@@ -1,11 +1,10 @@
-# static-template
+# josebayon
 
-GitHub template for static client sites: **Astro 7 + Tailwind 4**, built to `dist/` and
-served by Vercel. No backend, no database, no serverless.
+Personal portfolio of José Bayón: **Astro 7 + Tailwind 4**, built to `dist/` and served by
+Vercel. No backend, no database, no serverless.
 
-It is deliberately empty. What it carries is the skeleton — folder layout, tooling, CI and
-the conventions in `CLAUDE.md` — so a new site starts from a known-good setup instead of
-`npm create astro` plus an afternoon of wiring.
+Generated from the `static-template` skeleton, which is where the folder layout, tooling, CI
+and security headers come from. The conventions that govern the code live in `CLAUDE.md`.
 
 ## Requirements
 
@@ -34,37 +33,35 @@ npm run preview      # serve dist/ locally
 ## Structure
 
 ```
-public/            static assets served as-is (favicon, robots, images)
+public/            static assets served as-is (favicon, robots, og images)
 src/
-├─ assets/         images processed by <Image>, local fonts
+├─ assets/         images processed by <Image>
 ├─ components/
 │  ├─ ui/          reusable, knows nothing about the site
-│  ├─ layout/      header, footer, site chrome
+│  ├─ layout/      header, footer, theme toggle
 │  └─ sections/    page blocks
 ├─ content/        markdown collections (add src/content.config.ts to define them)
 ├─ layouts/        page shells
-├─ lib/            site config, helpers
+├─ lib/            site config and helpers
 ├─ pages/          routes
 └─ styles/         global.css with the @theme tokens
 scripts/           setup-github.sh · ruleset-main.json
 ```
 
-The empty folders carry a `.gitkeep` so the layout survives the first push. Delete it as
-soon as the folder has a real file.
+Two rules keep this from degrading:
 
-## New site checklist
+- **All copy and links come from `src/lib/site-config.ts`**, validated with Zod when the
+  module is first imported. Changing content means editing that file, not the components.
+- **Pages are pure composition.** `src/pages/index.astro` imports a layout and a few
+  sections and carries no markup of its own.
 
-1. Set `site` in `astro.config.ts` to the client's domain.
-2. Rename `mysite` in `package.json`.
-3. Replace the tokens in `src/styles/global.css` and check contrast (AA, 4.5:1) in **both**
-   themes.
-4. Replace `public/favicon.svg` and `public/apple-touch-icon.png`.
-5. Fill in `.env.example` and set the same variables in Vercel.
-6. Create the Vercel project (framework: Astro, build command `npm run build`) and point DNS.
-7. Run `scripts/setup-github.sh` to apply the branch ruleset and squash-only merges.
+Folders still carrying a `.gitkeep` are empty; delete it as soon as one gets a real file.
 
 ## Deployment
 
 Vercel builds on merge to `main` and creates a preview per PR. `vercel.json` carries the
 security headers and the `cleanUrls` / `trailingSlash` settings that must stay coherent with
 `astro.config.ts`.
+
+`site` in `astro.config.ts` still points at the free Vercel subdomain. Pointing a real domain
+at the project means updating that value too — it is what feeds every canonical URL.
