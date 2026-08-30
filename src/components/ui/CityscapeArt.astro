@@ -1,0 +1,545 @@
+---
+/**
+ * Ilustracion original: skyline plano con cielo, nubes, arboleda y colinas.
+ *
+ * Va en SVG y no en mapa de bits para poder animar cada capa por separado en el
+ * hover y que pese unos pocos KB en lugar de varios cientos.
+ *
+ * La paleta es literal a proposito: esto es obra grafica, no cromo de interfaz,
+ * y no debe seguir al tema claro/oscuro. Toda junta aqui para poder cambiarla
+ * de un vistazo.
+ */
+const palette = {
+  sun: '#ffd166',
+  cloud: '#fdfdfb',
+  hillFar: '#b7d7bd',
+  hillNear: '#6aa84f',
+  trunk: '#8a5a3b',
+  mountain: '#9db9d4',
+  bird: '#3d5a6c',
+  plane: '#f7f7f2',
+  planeAlt: '#457b9d',
+  beacon: '#ef476f',
+  road: '#4a4f57',
+  kerb: '#b9bec6',
+  roadLine: '#f4f1e8',
+  tyre: '#22262b',
+  glass: '#bfe0f2',
+  buildings: [
+    '#264653',
+    '#2a9d8f',
+    '#e9c46a',
+    '#f4a261',
+    '#e76f51',
+    '#457b9d',
+    '#1d3557',
+    '#a8dadc',
+    '#f1faee',
+    '#ef476f',
+  ],
+  trees: ['#2d6a4f', '#40916c', '#74c69d', '#ef476f', '#f4a261', '#ffb3c6', '#e9c46a'],
+};
+
+/**
+ * PRNG con semilla: sin esto Math.random cambiaria el SVG en cada build y todo
+ * commit traeria un diff enorme de coordenadas que no significa nada.
+ */
+function makeRng(seed: number): () => number {
+  let state = seed;
+  return () => {
+    state = (state * 1103515245 + 12345) % 2147483648;
+    return state / 2147483648;
+  };
+}
+
+const GROUND = 392;
+
+type Roof = 'flat' | 'peak' | 'step';
+
+interface Building {
+  x: number;
+  w: number;
+  h: number;
+  fill: string;
+  roof: Roof;
+}
+
+// Alturas y anchos alternados a mano: un skyline generado del todo al azar sale
+// con un perfil plano y aburrido.
+const buildings: Building[] = [
+  { x: -6, w: 42, h: 108, fill: palette.buildings[1]!, roof: 'flat' },
+  { x: 30, w: 30, h: 168, fill: palette.buildings[6]!, roof: 'flat' },
+  { x: 56, w: 46, h: 92, fill: palette.buildings[4]!, roof: 'flat' },
+  { x: 96, w: 34, h: 204, fill: palette.buildings[2]!, roof: 'peak' },
+  { x: 124, w: 40, h: 138, fill: palette.buildings[8]!, roof: 'flat' },
+  { x: 158, w: 30, h: 244, fill: palette.buildings[0]!, roof: 'step' },
+  { x: 182, w: 48, h: 116, fill: palette.buildings[5]!, roof: 'flat' },
+  { x: 224, w: 32, h: 182, fill: palette.buildings[6]!, roof: 'flat' },
+  { x: 250, w: 44, h: 98, fill: palette.buildings[9]!, roof: 'flat' },
+  { x: 288, w: 30, h: 216, fill: palette.buildings[1]!, roof: 'peak' },
+  { x: 312, w: 46, h: 128, fill: palette.buildings[8]!, roof: 'flat' },
+  { x: 352, w: 28, h: 178, fill: palette.buildings[3]!, roof: 'flat' },
+  { x: 374, w: 34, h: 104, fill: palette.buildings[7]!, roof: 'flat' },
+];
+
+const windowRng = makeRng(20260830);
+
+// No se llama `Window` para no ensombrecer el tipo global del DOM.
+interface WindowCell {
+  x: number;
+  y: number;
+  lit: boolean;
+}
+
+function windowsFor(b: Building): WindowCell[] {
+  const cells: WindowCell[] = [];
+  const cols = Math.max(1, Math.floor((b.w - 10) / 11));
+  const rows = Math.max(1, Math.floor((b.h - 22) / 15));
+  const padX = (b.w - cols * 11 + 5) / 2;
+
+  for (let row = 0; row < rows; row += 1) {
+    for (let col = 0; col < cols; col += 1) {
+      cells.push({
+        x: b.x + padX + col * 11,
+        y: GROUND - b.h + 16 + row * 15,
+        lit: windowRng() > 0.72,
+      });
+    }
+  }
+  return cells;
+}
+
+// `topY` es la coronacion real del edificio, tejado incluido: es donde se
+// clavan las antenas, y calcularlo en la plantilla la llenaba de ternarios.
+const skyline = buildings.map((b) => {
+  const roofRise = b.roof === 'peak' ? 30 : b.roof === 'step' ? 22 : 0;
+  return {
+    ...b,
+    windows: windowsFor(b),
+    topY: GROUND - b.h - roofRise,
+    antenna: b.h > 175,
+  };
+});
+
+const treeRng = makeRng(6180339);
+
+// Dos bandas de arboleda: la de detras mas pequena y apagada, para dar fondo.
+const treeBands = [0, 1].map((band) =>
+  Array.from({ length: band === 0 ? 26 : 22 }, (_, i) => {
+    const r = (band === 0 ? 11 : 15) + treeRng() * (band === 0 ? 6 : 9);
+    return {
+      cx: -10 + i * (band === 0 ? 16 : 19) + treeRng() * 8,
+      cy: (band === 0 ? 388 : 410) + treeRng() * 6,
+      r,
+      fill: palette.trees[Math.floor(treeRng() * palette.trees.length)]!,
+    };
+  }),
+);
+
+const clouds = [
+  { x: 20, y: 54, scale: 1.15, delay: 0 },
+  { x: 236, y: 30, scale: 0.9, delay: -7 },
+  { x: 150, y: 132, scale: 0.7, delay: -13 },
+  { x: 292, y: 176, scale: 1, delay: -4 },
+];
+
+// Dos carriles en sentidos opuestos. `dir` -1 dibuja el coche espejado para que
+// mire hacia donde circula.
+const CAR_W = 46;
+const cars = [
+  { dir: 1, y: 462, fill: palette.buildings[9]!, delay: 0, duration: 42 },
+  { dir: 1, y: 462, fill: palette.buildings[7]!, delay: -17, duration: 42 },
+  { dir: 1, y: 462, fill: palette.buildings[2]!, delay: -30, duration: 42 },
+  { dir: -1, y: 516, fill: palette.buildings[5]!, delay: -7, duration: 50 },
+  { dir: -1, y: 516, fill: palette.buildings[3]!, delay: -25, duration: 50 },
+  { dir: -1, y: 516, fill: palette.buildings[8]!, delay: -40, duration: 50 },
+];
+
+const laneMarks = Array.from({ length: 11 }, (_, i) => 6 + i * 38);
+const lamps = [44, 148, 252, 356];
+
+// Bandadas: cada una cruza el cielo a su altura y a su ritmo.
+const flocks = [
+  { y: 118, delay: 0, duration: 115 },
+  { y: 168, delay: -46, duration: 145 },
+  { y: 92, delay: -82, duration: 130 },
+];
+
+// Casitas entre las dos bandas de arboleda, que las tapan a medias y dan
+// sensacion de profundidad.
+const houses = [
+  { x: 26, w: 30, roof: palette.buildings[4]! },
+  { x: 96, w: 26, roof: palette.buildings[9]! },
+  { x: 178, w: 32, roof: palette.buildings[0]! },
+  { x: 258, w: 26, roof: palette.buildings[3]! },
+  { x: 330, w: 30, roof: palette.buildings[5]! },
+];
+---
+
+<svg
+  class="art"
+  viewBox="0 0 400 560"
+  preserveAspectRatio="xMidYMid slice"
+  role="img"
+  aria-label="Ilustración de una ciudad con montañas, nubes, pájaros, un avión, arboleda y una carretera con coches"
+>
+  <defs>
+    <linearGradient id="cityscape-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7ebde4"></stop>
+      <stop offset="65%" stop-color="#a9d6ef"></stop>
+      <stop offset="100%" stop-color="#d8ecf7"></stop>
+    </linearGradient>
+  </defs>
+
+  <rect width="400" height="560" fill="url(#cityscape-sky)"></rect>
+
+  <circle class="sun" cx="316" cy="88" r="34" fill={palette.sun} opacity="0.95"></circle>
+  <circle class="sun" cx="316" cy="88" r="22" fill={palette.cloud} opacity="0.28"></circle>
+
+  <path
+    class="mountains"
+    d="M0 392 L44 296 L88 348 L128 282 L176 344 L214 308 L262 356 L306 294 L352 346 L400 312 L400 392 Z"
+    fill={palette.mountain}
+    opacity="0.45"></path>
+
+  <g class="clouds" fill={palette.cloud}>
+    {
+      clouds.map((c) => (
+        <g
+          class="cloud"
+          transform={`translate(${c.x} ${c.y}) scale(${c.scale})`}
+          style={`animation-delay:${c.delay}s`}
+        >
+          <ellipse cx="28" cy="26" rx="28" ry="14" />
+          <ellipse cx="60" cy="18" rx="32" ry="18" />
+          <ellipse cx="92" cy="26" rx="24" ry="13" />
+          <rect x="0" y="24" width="116" height="14" rx="7" />
+        </g>
+      ))
+    }
+  </g>
+
+  {
+    flocks.map((f) => (
+      <g
+        class="flock"
+        style={`animation-delay:${f.delay}s;animation-duration:${f.duration}s`}
+        stroke={palette.bird}
+        stroke-width="1.8"
+        stroke-linecap="round"
+        fill="none"
+      >
+        <path d={`M0 ${f.y} q5 -5 10 0 q5 -5 10 0`} />
+        <path d={`M26 ${f.y + 12} q4 -4 8 0 q4 -4 8 0`} opacity="0.8" />
+        <path d={`M14 ${f.y + 24} q4.5 -4.5 9 0 q4.5 -4.5 9 0`} opacity="0.65" />
+      </g>
+    ))
+  }
+
+  <g class="plane">
+    <g transform="translate(40 148)">
+      <path
+        d="M-40 12 h16 M-18 12 h11"
+        stroke={palette.cloud}
+        stroke-width="3"
+        stroke-linecap="round"
+        opacity="0.5"
+        fill="none"></path>
+      <path d="M6 12 L2 -6 L13 -6 L22 12 Z" fill={palette.planeAlt}></path>
+      <ellipse cx="38" cy="12" rx="38" ry="9.5" fill={palette.plane}></ellipse>
+      <path d="M30 12 L19 30 L33 30 L45 12 Z" fill={palette.planeAlt}></path>
+      <circle cx="40" cy="11" r="1.9" fill={palette.glass}></circle>
+      <circle cx="48" cy="11" r="1.9" fill={palette.glass}></circle>
+      <circle cx="56" cy="11" r="1.9" fill={palette.glass}></circle>
+      <path d="M66 8 q7 2 9 4 q-4 2 -9 3 z" fill={palette.glass}></path>
+    </g>
+  </g>
+
+  <path
+    d="M0 392 Q 80 344 170 372 T 400 350 L400 400 L0 400 Z"
+    fill={palette.hillFar}
+    opacity="0.55"></path>
+
+  <g class="skyline">
+    {
+      skyline.map((b) => (
+        <g>
+          {b.roof === 'peak' && (
+            <polygon
+              points={`${b.x} ${GROUND - b.h} ${b.x + b.w / 2} ${GROUND - b.h - 30} ${b.x + b.w} ${GROUND - b.h}`}
+              fill={b.fill}
+            />
+          )}
+          {b.roof === 'step' && (
+            <rect x={b.x + 8} y={GROUND - b.h - 22} width={b.w - 16} height="22" fill={b.fill} />
+          )}
+          {b.antenna && (
+            <>
+              <rect
+                x={b.x + b.w / 2 - 1}
+                y={b.topY - 20}
+                width="2"
+                height="20"
+                fill={palette.bird}
+              />
+              <circle
+                class="beacon"
+                cx={b.x + b.w / 2}
+                cy={b.topY - 22}
+                r="2.6"
+                fill={palette.beacon}
+              />
+            </>
+          )}
+          <rect x={b.x} y={GROUND - b.h} width={b.w} height={b.h} fill={b.fill} />
+          {b.windows.map((w) => (
+            <rect
+              class:list={['window', w.lit && 'window--lit']}
+              x={w.x}
+              y={w.y}
+              width="5"
+              height="7"
+              rx="1"
+              fill={w.lit ? palette.sun : palette.cloud}
+              opacity={w.lit ? 0.9 : 0.34}
+            />
+          ))}
+        </g>
+      ))
+    }
+  </g>
+
+  <g class="houses">
+    {
+      houses.map((h) => (
+        <>
+          <polygon
+            points={`${h.x - 3} 408 ${h.x + h.w / 2} 392 ${h.x + h.w + 3} 408`}
+            fill={h.roof}
+          />
+          <rect x={h.x} y="408" width={h.w} height="18" fill={palette.cloud} />
+          <rect x={h.x + h.w / 2 - 3} y="415" width="6" height="11" fill={h.roof} opacity="0.7" />
+        </>
+      ))
+    }
+  </g>
+
+  {
+    treeBands.map((band, i) => (
+      <g class="trees" style={`animation-delay:${i * -2.5}s`}>
+        {band.map((t) => (
+          <>
+            <rect x={t.cx - 2} y={t.cy} width="4" height={t.r * 0.8} fill={palette.trunk} />
+            <circle cx={t.cx} cy={t.cy} r={t.r} fill={t.fill} />
+          </>
+        ))}
+      </g>
+    ))
+  }
+
+  <path d="M0 424 Q 130 402 268 428 T 400 416 L400 456 L0 456 Z" fill={palette.hillNear}></path>
+
+  <g class="lamps">
+    {
+      lamps.map((x) => (
+        <>
+          <rect x={x} y="418" width="3" height="36" fill={palette.bird} />
+          <rect x={x - 9} y="414" width="21" height="5" rx="2.5" fill={palette.bird} />
+          <ellipse cx={x + 1.5} cy="421" rx="7" ry="3" fill={palette.sun} opacity="0.85" />
+        </>
+      ))
+    }
+  </g>
+
+  <rect x="0" y="450" width="400" height="110" fill={palette.road}></rect>
+  <rect x="0" y="450" width="400" height="4" fill={palette.kerb}></rect>
+
+  <g fill={palette.roadLine} opacity="0.8">
+    {laneMarks.map((x) => <rect x={x} y="502" width="20" height="3" rx="1.5" />)}
+  </g>
+
+  {
+    cars.map((c) => (
+      <g
+        class:list={['car', c.dir === 1 ? 'car--right' : 'car--left']}
+        style={`animation-delay:${c.delay}s;animation-duration:${c.duration}s`}
+      >
+        <g
+          transform={`translate(0 ${c.y}) ${c.dir === -1 ? `scale(-1 1) translate(${-CAR_W} 0)` : ''}`}
+        >
+          <path d="M10 9 L15 1 L32 1 L38 9 Z" fill={c.fill} />
+          <rect x="0" y="8" width={CAR_W} height="14" rx="5" fill={c.fill} />
+          <rect x="16" y="2.5" width="7" height="6" rx="1.5" fill={palette.glass} />
+          <rect x="25" y="2.5" width="7" height="6" rx="1.5" fill={palette.glass} />
+          <rect x={CAR_W - 4} y="12" width="4" height="3" rx="1.5" fill={palette.sun} />
+          <circle cx="12" cy="22" r="4.5" fill={palette.tyre} />
+          <circle cx="34" cy="22" r="4.5" fill={palette.tyre} />
+        </g>
+      </g>
+    ))
+  }
+</svg>
+
+<style>
+  .art {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* La escena esta siempre viva, pero a paso muy lento. El aceleron del hover no
+     se hace tocando estas duraciones: cambiar `animation-duration` en caliente
+     recalcula el progreso y los elementos pegan un salto. Lo hace el script del
+     final subiendo el `playbackRate`, que si acelera de forma continua. */
+  .cloud {
+    animation: cloud-drift 600s linear infinite;
+  }
+
+  .sun {
+    animation: sun-pulse 16s ease-in-out infinite;
+    transform-origin: 316px 88px;
+  }
+
+  .trees {
+    animation: tree-sway 14s ease-in-out infinite;
+    transform-origin: center bottom;
+  }
+
+  .window--lit {
+    animation: window-flicker 14s steps(1, end) infinite;
+  }
+
+  .flock {
+    /* La duracion la fija cada bandada por `style`, para que no vuelen en bloque. */
+    animation: flock-cross 120s linear infinite;
+  }
+
+  .plane {
+    animation: plane-cross 110s linear infinite;
+  }
+
+  /* La duracion de cada coche la fija su `style`, para que no circulen en bloque. */
+  .car--right {
+    animation: car-right 42s linear infinite;
+  }
+
+  .car--left {
+    animation: car-left 50s linear infinite;
+  }
+
+  .beacon {
+    animation: beacon-blink 6s steps(1, end) infinite;
+  }
+
+  @keyframes cloud-drift {
+    from {
+      translate: -140px 0;
+    }
+    to {
+      translate: 420px 0;
+    }
+  }
+
+  @keyframes sun-pulse {
+    0%,
+    100% {
+      scale: 1;
+    }
+    50% {
+      scale: 1.07;
+    }
+  }
+
+  @keyframes tree-sway {
+    0%,
+    100% {
+      rotate: -0.6deg;
+    }
+    50% {
+      rotate: 0.6deg;
+    }
+  }
+
+  @keyframes flock-cross {
+    from {
+      translate: -60px 0;
+    }
+    to {
+      translate: 460px -26px;
+    }
+  }
+
+  @keyframes plane-cross {
+    from {
+      translate: -140px 0;
+    }
+    to {
+      translate: 520px 0;
+    }
+  }
+
+  @keyframes beacon-blink {
+    0%,
+    55% {
+      opacity: 1;
+    }
+    60%,
+    100% {
+      opacity: 0.15;
+    }
+  }
+
+  @keyframes car-right {
+    from {
+      translate: -70px 0;
+    }
+    to {
+      translate: 470px 0;
+    }
+  }
+
+  @keyframes car-left {
+    from {
+      translate: 470px 0;
+    }
+    to {
+      translate: -70px 0;
+    }
+  }
+
+  @keyframes window-flicker {
+    0%,
+    45% {
+      opacity: 0.9;
+    }
+    50%,
+    70% {
+      opacity: 0.35;
+    }
+    75%,
+    100% {
+      opacity: 0.9;
+    }
+  }
+</style>
+
+<script>
+  /**
+   * Acelerar bajando `animation-duration` en el hover haria saltar a cada
+   * elemento: el navegador recalcula el progreso con la duracion nueva y lo
+   * teletransporta a otro punto del recorrido. `playbackRate` respeta donde
+   * esta cada uno y solo cambia el ritmo de ahi en adelante.
+   */
+  const HOVER_RATE = 4;
+
+  document.querySelectorAll<SVGSVGElement>('.art').forEach((art) => {
+    const setRate = (rate: number): void => {
+      for (const animation of art.getAnimations({ subtree: true })) {
+        animation.playbackRate = rate;
+      }
+    };
+
+    art.addEventListener('pointerenter', () => setRate(HOVER_RATE));
+    art.addEventListener('pointerleave', () => setRate(1));
+  });
+</script>
