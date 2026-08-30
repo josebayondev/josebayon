@@ -144,8 +144,17 @@ This is a **public repository**.
   gitignored; `.env.example` is committed with placeholder values. Note that everything
   prefixed `PUBLIC_` reaches the browser — a static site compiles nothing private.
 - **Security headers** in `vercel.json`: HSTS with preload, `X-Content-Type-Options`,
-  `Referrer-Policy`, a `Permissions-Policy` that denies every API the site does not use,
-  COOP/CORP and `X-Frame-Options`.
+  `Referrer-Policy`, a `Permissions-Policy` that denies every API the site does not use so a
+  script added later can't request one unnoticed, COOP/CORP, and `X-Frame-Options` (redundant
+  with `frame-ancestors` in current browsers, but it's what some older scanners and proxies
+  still understand).
+- **`vercel.json` has no `"//"` comment keys.** They read fine locally, but Vercel validates
+  the file strictly against its schema on import and rejects any unknown property — first
+  seen as `Invalid request: should NOT have additional property '//'` when importing the
+  project. Put explanations here instead.
+- **Cache headers** in `vercel.json`: `/_astro/*` and `/fonts/*` are immutable — their
+  filenames carry a content hash, so a changed file gets a new URL. `/og/*` is not: those
+  images regenerate under the same name, so it's a short max-age with revalidation instead.
 - **Secret scanning**: `gitleaks` runs on every PR over the **full** history, so a secret
   that ever landed keeps failing CI until it is purged — not merely removed in a later
   commit. It uses the MIT CLI from a digest-pinned image rather than `gitleaks-action`,

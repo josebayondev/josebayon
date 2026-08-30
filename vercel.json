@@ -1,15 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "//": [
-    "cleanUrls + trailingSlash deben cuadrar con astro.config.ts (trailingSlash 'never'",
-    "+ build.format 'file'), o aparecen cadenas de redirects y canonicals que apuntan",
-    "a una URL que redirige.",
-    "",
-    "La CSP de aqui lleva SOLO las directivas que un <meta> no admite. Si activas",
-    "security.csp en astro.config.ts, aqui NO puede aparecer default-src: el navegador",
-    "aplica la interseccion y bloquearia los scripts que el <meta> si autoriza.",
-    "Detalle completo en CLAUDE.md."
-  ],
   "cleanUrls": true,
   "trailingSlash": false,
   "headers": [
@@ -33,12 +23,10 @@
           "value": "strict-origin-when-cross-origin"
         },
         {
-          "//": "Se deniegan las APIs que este sitio no usa, para que un script anadido despues no pueda pedirlas sin que nadie lo note.",
           "key": "Permissions-Policy",
           "value": "accelerometer=(), autoplay=(), camera=(), display-capture=(), encrypted-media=(), fullscreen=(self), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), usb=()"
         },
         {
-          "//": "Redundante con frame-ancestors en navegadores actuales, pero es lo unico que entienden algunos escaneres y proxies antiguos.",
           "key": "X-Frame-Options",
           "value": "DENY"
         },
@@ -53,7 +41,6 @@
       ]
     },
     {
-      "//": "Nombre con hash del contenido: si cambia el fichero cambia la URL.",
       "source": "/_astro/(.*)",
       "headers": [
         {
@@ -72,7 +59,6 @@
       ]
     },
     {
-      "//": "Se regeneran con el mismo nombre, asi que no pueden ser immutable.",
       "source": "/og/(.*)",
       "headers": [
         {
