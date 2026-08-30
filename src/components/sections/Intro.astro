@@ -1,0 +1,21 @@
+---
+import Avatar from '../ui/Avatar.astro';
+import { siteConfig } from '../../lib/site-config';
+
+// charAt en lugar de [0] por `noUncheckedIndexedAccess`: siempre devuelve string.
+const initials = siteConfig.name
+  .split(' ')
+  .map((word) => word.charAt(0))
+  .join('');
+---
+
+<section>
+  <Avatar alt={siteConfig.avatarAlt} initials={initials} />
+
+  <h1 class="mt-6 text-4xl font-medium tracking-tight sm:text-5xl">{siteConfig.name}</h1>
+  <p class="mt-2 text-content-muted">{siteConfig.role}</p>
+
+  <div class="mt-8 space-y-4 leading-relaxed">
+    {siteConfig.bio.map((paragraph) => <p>{paragraph}</p>)}
+  </div>
+</section>

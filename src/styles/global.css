@@ -1,5 +1,10 @@
 @import 'tailwindcss';
 
+/* Fuentes servidas desde el propio dominio. Cada archivo trae su unicode-range,
+   asi que el navegador solo descarga el subconjunto latino aunque se importe todo. */
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+
 /* Variante por atributo: permite tres estados (light / dark / ausente = sistema). */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
@@ -12,17 +17,57 @@
   --color-content-muted: oklch(42% 0.012 260);
   --color-border: oklch(90% 0.005 260);
   --color-accent: oklch(55% 0.18 260);
+
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Ancho de la columna de lectura. Da max-w-measure y mantiene la medida en un
+     numero de caracteres comodo sin repetir el valor por los componentes. */
+  --container-measure: 40rem;
+
+  /* Ancho total de la rejilla de dos columnas (texto + panel visual). */
+  --container-page: 96rem;
+
+  /* Ancho del panel visual. Al ser menor que su columna, el `ml-auto` que lo
+     acompana lo empuja contra el borde derecho. */
+  --container-panel: 30rem;
 }
 
 /* Mismos tokens, valores oscuros. Recalcular el contraste (AA 4.5:1) al tocarlos:
    Lighthouse solo audita el tema en el que este el navegador. */
 [data-theme='dark'] {
-  --color-surface: oklch(17% 0.01 260);
-  --color-surface-alt: oklch(21% 0.012 260);
-  --color-content: oklch(96% 0.005 260);
-  --color-content-muted: oklch(80% 0.01 260);
-  --color-border: oklch(30% 0.012 260);
-  --color-accent: oklch(72% 0.15 260);
+  /* Croma 0: gris neutro. Con algo de croma en el azul el fondo se lee como
+     "negro azulado" en pantallas frias, que es justo lo que no se quiere. */
+  --color-surface: oklch(23% 0 0);
+  --color-surface-alt: oklch(28% 0 0);
+  --color-content: oklch(95% 0 0);
+  --color-content-muted: oklch(76% 0 0);
+  --color-border: oklch(39% 0 0);
+  --color-accent: oklch(74% 0.13 250);
+}
+
+/* color-scheme pinta scrollbars y controles nativos acorde al tema. Va por
+   atributo y no en @theme porque tiene que cambiar con el toggle. */
+[data-theme='light'] {
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Sin esto el foco por teclado hereda el anillo del navegador, que sobre el
+     tema oscuro casi no se ve. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

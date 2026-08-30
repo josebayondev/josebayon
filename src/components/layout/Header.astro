@@ -1,0 +1,13 @@
+---
+import SocialLinks from '../ui/SocialLinks.astro';
+import ThemeToggle from './ThemeToggle.astro';
+import { siteConfig } from '../../lib/site-config';
+
+// El nombre no se repite aqui: el <h1> de la home queda justo debajo y seria
+// el mismo texto dos veces seguidas para un lector de pantalla.
+---
+
+<header class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 py-6">
+  <SocialLinks links={siteConfig.socials} />
+  <ThemeToggle />
+</header>

@@ -1,0 +1,16 @@
+---
+import { siteConfig } from '../../lib/site-config';
+
+const year = new Date().getFullYear();
+---
+
+<footer
+  class="flex flex-wrap justify-between gap-2 border-t border-border py-6 text-sm text-content-muted"
+>
+  <p>© {year} {siteConfig.name}</p>
+  <p>
+    <a href={`mailto:${siteConfig.email}`} class="rounded-sm transition-colors hover:text-accent">
+      {siteConfig.email}
+    </a>
+  </p>
+</footer>

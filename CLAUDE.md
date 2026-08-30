@@ -11,24 +11,21 @@ unlike `template-app`).
 
 ## Project
 
-**This repository is a GitHub template, and it is deliberately empty.** It is not a website
-and must not become one. What it carries is the skeleton a static client site starts from:
-folder layout, tooling, CI, security headers and the conventions below.
+**This is Jose Bayón's personal portfolio**, at `https://josebayon.vercel.app`. Its audience
+is recruiters and potential clients, so the bar for the home page is: loads instantly, reads
+well on a phone, and says who he is without making anyone scroll to find out.
 
 Static site, no backend: Astro 7 + Tailwind 4, built to `dist/` and served by Vercel from a
 CDN. There is no server, no database and no serverless function.
 
-The sibling repository `template-app` is the equivalent for projects that _do_ have a
-backend. Where a decision here differs from the one there, the difference is deliberate and
-documented below.
+It was generated from the `static-template` GitHub template, which is where the tooling, CI,
+security headers and most of the conventions below come from. That template stays
+deliberately empty; **this repository does not** — building pages, components and sections
+here is the whole point. When a convention below only made sense for a client template, fix
+it here rather than working around it.
 
-The placeholder name is `mysite` (`https://mysite.example.com`). It is deliberately not
-`site` or `web`, which appear inside identifiers all over the codebase and would be
-destructive to search-and-replace.
-
-**Do not add pages, components, sections, collections or demo content to this repository.**
-Someone cloning it wants an empty starting point, not a landing page to delete. If asked to
-build something concrete, build it in the repo made _from_ this template.
+The `site` in `astro.config.ts` is still the free Vercel subdomain. When a real domain is
+bought, that value and the canonical it feeds are the only things that must change.
 
 ## Commands you must NOT run
 
@@ -66,8 +63,8 @@ through the postinstall, and the build works without approving either.
 
 ## Structure
 
-The empty folders exist to fix the layout before the first file lands in them. Each carries
-a `.gitkeep`, which is deleted as soon as the folder has real content.
+Folders that are still empty carry a `.gitkeep`, inherited from the template so the layout
+survived the first push. Delete it the moment the folder gets a real file.
 
 - **`src/components/`** — three folders with different jobs. `ui/` is reusable and knows
   nothing about the site; `layout/` is header, footer and the site chrome; `sections/` are
@@ -84,9 +81,10 @@ a `.gitkeep`, which is deleted as soon as the folder has real content.
 
 ## Conventions
 
-- Code, branch names and commit messages in **English**. UI text in **Spanish**.
-  **Code comments in Spanish** — this differs from `template-app` on purpose.
+- Code and branch names in **English**. UI text, code comments and **commit messages** in
+  **Spanish** — the last two differ from `template-app` on purpose.
 - Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:` — one line.
+  The prefix stays in English; what follows it is Spanish.
 - Comments explain **why**, never what the line already says. Keep them scarce: a warning
   where there is a real trap, not a narration of the file.
 - Colours, spacing and radii come from the tokens in `global.css`. Never a literal colour in
@@ -126,8 +124,9 @@ Do not propose or add any of this without being asked:
 - **No CMS.** Content lives in `src/content/` as Markdown, validated at build time.
 - **No React, Vue or Svelte.** If an interaction genuinely needs a framework, it goes in as
   a single Astro island with a written justification.
-- **No i18n.** The sites built from this are monolingual `es-ES`. Adding `[lang]` routing
-  later means revisiting canonicals, `hreflang` and the sitemap; do not half-build it now.
+- **No i18n.** The site is monolingual `es-ES`. An English version is a plausible want for a
+  portfolio aimed at recruiters, but adding `[lang]` routing means revisiting canonicals,
+  `hreflang` and the sitemap: do it deliberately in one go, never half-build it.
 - **No cookie banner** by default. Keep fonts self-hosted and analytics cookieless. Adding
   an embedded video, a map or a chat widget breaks this and requires both a banner and a
   cookie policy.
@@ -157,8 +156,10 @@ This is a **public repository**.
 
 ### If you add a CSP
 
-`astro.config.ts` ships without one because an empty skeleton has nothing to hash. When the
-site grows scripts, enable `security.csp` there — it emits a `<meta http-equiv>` per page
+`astro.config.ts` still has none. The only script on the site today is the inline anti-FOUC
+theme setter in `BaseLayout.astro`, and **Astro does not hash `is:inline` scripts** — so
+turning `security.csp` on without adding that hash by hand blanks the page in production.
+When the time comes, enable `security.csp` there — it emits a `<meta http-equiv>` per page
 with auto-generated hashes — and keep `vercel.json` to the directives a `<meta>` cannot
 carry. The browser applies the **intersection** of both, so a `default-src` in the header
 would act as a fallback for `script-src` and block the very scripts the `<meta>` authorises.

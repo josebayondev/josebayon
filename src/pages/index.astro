@@ -1,20 +1,13 @@
 ---
-import '../styles/global.css';
-
-const title = 'Static template';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Intro from '../components/sections/Intro.astro';
+import Stack from '../components/sections/Stack.astro';
+import ShowcasePanel from '../components/ui/ShowcasePanel.astro';
 ---
 
-<html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>{title}</title>
-  </head>
-  <body class="flex min-h-dvh items-center justify-center bg-surface text-content">
-    <main class="text-center">
-      <h1 class="text-4xl font-bold">{title}</h1>
-      <p class="mt-2 text-content-muted">Astro 7 + Tailwind 4. Empieza por aqui.</p>
-    </main>
-  </body>
-</html>
+<BaseLayout>
+  <ShowcasePanel slot="aside" />
+
+  <Intro />
+  <Stack />
+</BaseLayout>
