@@ -1,6 +1,6 @@
 # josebayon
 
-Personal portfolio of José Bayón: **Astro 7 + Tailwind 4**, built to `dist/` and served by
+Personal portfolio of Jose Bayón: **Astro 7 + Tailwind 4**, built to `dist/` and served by
 Vercel. No backend, no database, no serverless.
 
 Generated from the `static-template` skeleton, which is where the folder layout, tooling, CI

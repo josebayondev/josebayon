@@ -11,7 +11,7 @@ unlike `template-app`).
 
 ## Project
 
-**This is José Bayón's personal portfolio**, at `https://josebayon.vercel.app`. Its audience
+**This is Jose Bayón's personal portfolio**, at `https://josebayon.vercel.app`. Its audience
 is recruiters and potential clients, so the bar for the home page is: loads instantly, reads
 well on a phone, and says who he is without making anyone scroll to find out.
 
@@ -81,9 +81,10 @@ survived the first push. Delete it the moment the folder gets a real file.
 
 ## Conventions
 
-- Code, branch names and commit messages in **English**. UI text in **Spanish**.
-  **Code comments in Spanish** — this differs from `template-app` on purpose.
+- Code and branch names in **English**. UI text, code comments and **commit messages** in
+  **Spanish** — the last two differ from `template-app` on purpose.
 - Conventional Commits: `feat:`, `fix:`, `chore:`, `docs:`, `test:`, `refactor:` — one line.
+  The prefix stays in English; what follows it is Spanish.
 - Comments explain **why**, never what the line already says. Keep them scarce: a warning
   where there is a real trap, not a narration of the file.
 - Colours, spacing and radii come from the tokens in `global.css`. Never a literal colour in
