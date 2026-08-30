@@ -2,8 +2,8 @@ import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  // Sustituir por el dominio real del cliente antes del primer deploy.
-  site: 'https://mysite.example.com',
+  // TODO: sustituir por el dominio propio en cuanto esté comprado.
+  site: 'https://josebayon.vercel.app',
 
   // Estas dos van juntas con cleanUrls/trailingSlash de vercel.json: cambiar una
   // sin las otras genera cadenas de redirects.
