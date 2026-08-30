@@ -1,0 +1,101 @@
+---
+import '../styles/global.css';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import { buildCanonical, buildPersonSchema } from '../lib/seo';
+import { siteConfig } from '../lib/site-config';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = siteConfig.title, description = siteConfig.description } = Astro.props;
+
+const canonical = buildCanonical(Astro.url.pathname);
+const personSchema = buildPersonSchema();
+
+// Sin panel a la derecha la pagina no debe partirse en dos columnas y dejar
+// media pantalla vacia; por eso la rejilla es condicional.
+const hasAside = Astro.slots.has('aside');
+---
+
+<!doctype html>
+<html lang="es" class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content={siteConfig.locale} />
+    <meta property="og:site_name" content={siteConfig.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {/* Falta og:image: sin un archivo real en public/og/ es peor declararlo que omitirlo. */}
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    <script type="application/ld+json" is:inline set:html={personSchema} />
+
+    {
+      /*
+      Tiene que correr antes del primer pintado o se ve un fogonazo blanco al
+      cargar en oscuro. Ojo: Astro no hashea los `is:inline`, asi que al activar
+      `security.csp` hay que anadir el hash de este script a mano.
+    */
+    }
+    <script is:inline>
+      (function () {
+        try {
+          const stored = localStorage.getItem('theme');
+          const theme =
+            stored === 'light' || stored === 'dark'
+              ? stored
+              : window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          document.documentElement.dataset.theme = theme;
+        } catch {
+          // Modo incognito o cookies bloqueadas: el tema claro es el de por defecto.
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
+  </head>
+
+  <body class="min-h-dvh bg-surface text-content">
+    <div
+      class:list={[
+        'mx-auto grid w-full max-w-page gap-10 px-6 lg:gap-16 lg:px-10',
+        hasAside && 'lg:grid-cols-2',
+      ]}
+    >
+      <div class="flex min-h-dvh w-full max-w-measure flex-col">
+        <Header />
+        <main class="flex-1 py-10 lg:py-16">
+          <slot />
+        </main>
+        <Footer />
+      </div>
+
+      {
+        hasAside && (
+          <aside class="h-72 pb-10 sm:h-96 lg:sticky lg:top-0 lg:h-dvh lg:py-12 lg:pb-12">
+            <div class="h-full w-full lg:ml-auto lg:max-w-panel">
+              <slot name="aside" />
+            </div>
+          </aside>
+        )
+      }
+    </div>
+  </body>
+</html>
