@@ -40,8 +40,8 @@
      "negro azulado" en pantallas frias, que es justo lo que no se quiere. */
   --color-surface: oklch(23% 0 0);
   --color-surface-alt: oklch(28% 0 0);
-  --color-content: oklch(95% 0 0);
-  --color-content-muted: oklch(76% 0 0);
+  --color-content: oklch(90% 0 0);
+  --color-content-muted: oklch(80% 0 0);
   --color-border: oklch(39% 0 0);
   --color-accent: oklch(74% 0.13 250);
 }
@@ -60,6 +60,10 @@
   body {
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+  }
+
+  h1 {
+    @apply dark:text-white;
   }
 
   /* Sin esto el foco por teclado hereda el anillo del navegador, que sobre el
