@@ -1,21 +1,66 @@
 ---
-import Avatar from '../ui/Avatar.astro';
 import { siteConfig } from '../../lib/site-config';
-
-// charAt en lugar de [0] por `noUncheckedIndexedAccess`: siempre devuelve string.
-const initials = siteConfig.name
-  .split(' ')
-  .map((word) => word.charAt(0))
-  .join('');
 ---
 
 <section>
-  <Avatar alt={siteConfig.avatarAlt} initials={initials} />
-
-  <h1 class="mt-6 text-4xl font-medium tracking-tight sm:text-5xl">{siteConfig.name}</h1>
+  <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">{siteConfig.name}</h1>
   <p class="mt-2 text-content-muted">{siteConfig.role}</p>
 
-  <div class="mt-8 space-y-4 leading-relaxed">
-    {siteConfig.bio.map((paragraph) => <p>{paragraph}</p>)}
+  <div class="mt-8">
+    <div class="flex items-center justify-between border-b border-border">
+      <span class="text-sm text-content-muted">Biografía</span>
+      <div class="flex gap-4" role="tablist" aria-label="Longitud de la biografía">
+        <button
+          type="button"
+          role="tab"
+          aria-selected="true"
+          data-bio-tab="short"
+          class="cursor-pointer border-b-2 border-content px-1 pb-2 text-sm text-content"
+        >
+          Corta
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected="false"
+          data-bio-tab="long"
+          class="cursor-pointer border-b-2 border-transparent px-1 pb-2 text-sm text-content-muted"
+        >
+          Larga
+        </button>
+      </div>
+    </div>
+
+    <div data-bio-panel="short" class="space-y-4 pt-8 leading-relaxed">
+      {siteConfig.bio.map((paragraph) => <p>{paragraph}</p>)}
+    </div>
+    <div data-bio-panel="long" class="hidden space-y-4 pt-8 leading-relaxed">
+      {siteConfig.bioLong.map((paragraph) => <p>{paragraph}</p>)}
+    </div>
   </div>
 </section>
+
+<script>
+  // Vanilla JS: alternar visibilidad de paneles no justifica un island con framework.
+  const tabs = document.querySelectorAll<HTMLButtonElement>('[data-bio-tab]');
+  const panels = document.querySelectorAll<HTMLElement>('[data-bio-panel]');
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.bioTab;
+
+      tabs.forEach((t) => {
+        const isActive = t === tab;
+        t.setAttribute('aria-selected', String(isActive));
+        t.classList.toggle('border-content', isActive);
+        t.classList.toggle('text-content', isActive);
+        t.classList.toggle('border-transparent', !isActive);
+        t.classList.toggle('text-content-muted', !isActive);
+      });
+
+      panels.forEach((panel) => {
+        panel.classList.toggle('hidden', panel.dataset.bioPanel !== target);
+      });
+    });
+  });
+</script>
