@@ -33,6 +33,12 @@ updates:
       - dependency-name: 'typescript'
         update-types:
           - 'version-update:semver-major'
+      # La 1.0.0 deja de respetar `printWidth` (etiquetas largas ya no se
+      # parten), lo que reformatea el repo entero de forma incorrecta.
+      # Revisar tras un patch que lo corrija.
+      - dependency-name: 'prettier-plugin-astro'
+        update-types:
+          - 'version-update:semver-major'
 
   # SHAs de las actions en .github/workflows/
   - package-ecosystem: 'github-actions'
