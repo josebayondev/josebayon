@@ -1,0 +1,18 @@
+---
+import ProjectCard from '../ui/ProjectCard.astro';
+import { siteConfig } from '../../lib/site-config';
+import bookingApp from '../../assets/booking-app.jpg';
+---
+
+<section>
+  <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">Proyectos</h1>
+  <p class="mt-2 text-content-muted">Cosas que he construido de principio a fin.</p>
+
+  <div class="mt-10 grid gap-8 sm:grid-cols-2">
+    <ProjectCard
+      project={siteConfig.project}
+      image={bookingApp}
+      alt="Captura de la pantalla de inicio de la app de reservas"
+    />
+  </div>
+</section>
