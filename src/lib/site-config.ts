@@ -18,6 +18,13 @@ const stackGroupSchema = z.object({
   items: z.array(z.string().min(1)).min(1),
 });
 
+const projectSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().min(1),
+  // URL de la app en produccion; la captura se importa aparte desde src/assets/.
+  href: z.url(),
+});
+
 const siteConfigSchema = z.object({
   url: z.url(),
   locale: z.string().min(2),
@@ -33,11 +40,15 @@ const siteConfigSchema = z.object({
   email: z.email(),
   socials: z.array(socialLinkSchema).min(1),
   stack: z.array(stackGroupSchema).min(1),
+  // Objeto, no array: hoy hay un unico proyecto. Cuando haya un segundo, esto
+  // pasa a `projects: z.array(projectSchema)` junto con su listado en la pagina.
+  project: projectSchema,
 });
 
 export type SiteConfig = z.infer<typeof siteConfigSchema>;
 export type SocialLink = z.infer<typeof socialLinkSchema>;
 export type StackGroup = z.infer<typeof stackGroupSchema>;
+export type Project = z.infer<typeof projectSchema>;
 
 export const siteConfig: SiteConfig = siteConfigSchema.parse({
   url: 'https://josebayon.vercel.app',
@@ -81,4 +92,11 @@ export const siteConfig: SiteConfig = siteConfigSchema.parse({
     { title: 'Backend', items: ['Python', 'FastAPI', 'PostgreSQL', 'REST'] },
     { title: 'Y además', items: ['SEO técnico', 'Rendimiento web', 'Accesibilidad', 'CI/CD'] },
   ],
+
+  project: {
+    title: 'App de reservas',
+    description:
+      'Reserva de citas sin registro: el cliente accede a su propia reserva mediante un token opaco que recibe por email, sin necesidad de cuenta ni contraseña. Panel de administración aparte, protegido con autenticación. FastAPI + React + PostgreSQL.',
+    href: 'https://booking-app-alpha-ochre.vercel.app',
+  },
 });
