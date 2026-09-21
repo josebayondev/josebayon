@@ -5,17 +5,25 @@ import { siteConfig } from '../../lib/site-config';
 <section>
   <h1 class="text-4xl font-bold tracking-tight sm:text-5xl">{siteConfig.name}</h1>
   <p class="mt-2 text-content-muted">{siteConfig.role}</p>
+  <p class="mt-4 max-w-measure text-content-muted">
+    Bienvenido a mi espacio para hablar de programación. Aquí escribo, sin filtro, sobre lo que voy
+    aprendiendo y construyendo — de la IA que uso a diario a las decisiones que tomo detrás de cada
+    proyecto.{' '}
+    <a href="#blog" class="text-accent transition-opacity hover:opacity-80">
+      Ir a mi blog <span aria-hidden="true">↓</span>
+    </a>
+  </p>
 
   <div class="mt-8">
     <div class="flex items-center justify-between border-b border-border">
-      <span class="text-sm text-content-muted">Biografía</span>
+      <span class="text-base text-content-muted">Biografía</span>
       <div class="flex gap-4" role="tablist" aria-label="Longitud de la biografía">
         <button
           type="button"
           role="tab"
           aria-selected="true"
           data-bio-tab="short"
-          class="cursor-pointer border-b-2 border-content px-1 pb-2 text-sm text-content"
+          class="cursor-pointer border-b-2 border-accent px-1 pb-2 text-base text-accent"
         >
           Corta
         </button>
@@ -24,7 +32,7 @@ import { siteConfig } from '../../lib/site-config';
           role="tab"
           aria-selected="false"
           data-bio-tab="long"
-          class="cursor-pointer border-b-2 border-transparent px-1 pb-2 text-sm text-content-muted"
+          class="cursor-pointer border-b-2 border-transparent px-1 pb-2 text-base text-content-muted"
         >
           Larga
         </button>
@@ -52,8 +60,8 @@ import { siteConfig } from '../../lib/site-config';
       tabs.forEach((t) => {
         const isActive = t === tab;
         t.setAttribute('aria-selected', String(isActive));
-        t.classList.toggle('border-content', isActive);
-        t.classList.toggle('text-content', isActive);
+        t.classList.toggle('border-accent', isActive);
+        t.classList.toggle('text-accent', isActive);
         t.classList.toggle('border-transparent', !isActive);
         t.classList.toggle('text-content-muted', !isActive);
       });

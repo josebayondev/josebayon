@@ -1,0 +1,27 @@
+---
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('blog')).sort((a, b) => a.id.localeCompare(b.id));
+---
+
+<section id="blog" class="mt-16">
+  <div class="border-b border-border">
+    <h2 class="pb-2 text-base text-content-muted">Blog</h2>
+  </div>
+
+  <ul class="mt-6 flex flex-col divide-y divide-border">
+    {
+      posts.map((post) => (
+        <li>
+          <a
+            href={`/blog/${post.id}`}
+            class="block py-4 text-base font-semibold text-content transition-colors hover:text-accent"
+          >
+            {post.data.title}{' '}
+            <span class="text-sm font-normal text-content-muted italic">({post.data.excerpt})</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</section>

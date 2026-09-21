@@ -8,9 +8,15 @@ import { siteConfig } from '../lib/site-config';
 interface Props {
   title?: string;
   description?: string;
+  /** Centra la columna de contenido en vez del anclaje a la izquierda por defecto. Para paginas de lectura (posts) sin aside. */
+  centered?: boolean;
 }
 
-const { title = siteConfig.title, description = siteConfig.description } = Astro.props;
+const {
+  title = siteConfig.title,
+  description = siteConfig.description,
+  centered = false,
+} = Astro.props;
 
 const canonical = buildCanonical(Astro.url.pathname);
 const personSchema = buildPersonSchema();
@@ -79,7 +85,7 @@ const hasAside = Astro.slots.has('aside');
         hasAside && 'lg:grid-cols-2',
       ]}
     >
-      <div class="flex min-h-dvh w-full max-w-measure flex-col">
+      <div class:list={['flex min-h-dvh w-full max-w-measure flex-col', centered && 'mx-auto']}>
         <Header />
         <main class="flex-1 pt-2 pb-10 lg:pt-4 lg:pb-16">
           <slot />

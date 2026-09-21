@@ -1,0 +1,66 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { siteConfig } from '../../lib/site-config';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+
+<BaseLayout title={`${post.data.title} — ${siteConfig.name}`} centered>
+  <article>
+    <a
+      href="/"
+      class="inline-flex items-center gap-1.5 text-xs text-content-muted transition-colors hover:text-accent"
+    >
+      <span aria-hidden="true">←</span> Volver
+    </a>
+    <h1 class="mt-6 text-3xl font-bold tracking-tight sm:text-4xl">{post.data.title}</h1>
+    <div class="prose mt-8">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  /* `Content` se inserta sin el atributo de scope de este componente, asi que
+     las reglas van con :global. */
+  .prose {
+    line-height: 1.75;
+    color: var(--color-content-muted);
+  }
+
+  .prose :global(p + p) {
+    margin-top: 1.25rem;
+  }
+
+  .prose :global(h2) {
+    margin-top: 2rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--color-content);
+  }
+
+  .prose :global(a) {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .prose :global(code) {
+    border-radius: 0.25rem;
+    background-color: var(--color-surface-alt);
+    padding: 0.125rem 0.375rem;
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+  }
+</style>
