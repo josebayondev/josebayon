@@ -18,13 +18,6 @@ const stackGroupSchema = z.object({
   items: z.array(z.string().min(1)).min(1),
 });
 
-const projectSchema = z.object({
-  title: z.string().min(1),
-  description: z.string().min(1),
-  // URL de la app en produccion; la captura se importa aparte desde src/assets/.
-  href: z.url(),
-});
-
 const siteConfigSchema = z.object({
   url: z.url(),
   locale: z.string().min(2),
@@ -40,15 +33,11 @@ const siteConfigSchema = z.object({
   email: z.email(),
   socials: z.array(socialLinkSchema).min(1),
   stack: z.array(stackGroupSchema).min(1),
-  // Objeto, no array: hoy hay un unico proyecto. Cuando haya un segundo, esto
-  // pasa a `projects: z.array(projectSchema)` junto con su listado en la pagina.
-  project: projectSchema,
 });
 
 export type SiteConfig = z.infer<typeof siteConfigSchema>;
 export type SocialLink = z.infer<typeof socialLinkSchema>;
 export type StackGroup = z.infer<typeof stackGroupSchema>;
-export type Project = z.infer<typeof projectSchema>;
 
 export const siteConfig: SiteConfig = siteConfigSchema.parse({
   url: 'https://josebayon.vercel.app',
@@ -61,7 +50,7 @@ export const siteConfig: SiteConfig = siteConfigSchema.parse({
     'Desarrollador full stack. Aplicaciones web con React, TypeScript, Python y FastAPI, y sitios rápidos con Astro y Next.js.',
 
   bio: [
-    'Soy desarrollador fullstack. Estudié DAM y llevo dos años centrado en construir software que funcione en producción, no solo en local. En Grupo SIC soy el único responsable de todo el stack, desde la base de datos hasta la interfaz.',
+    'Soy desarrollador fullstack. Estudié DAM y llevo dos años centrado en construir software que funcione en producción, no solo en local.',
     'Ahora mismo me interesa especialmente la integración de IA en el desarrollo real: uso Claude Code en mi flujo de trabajo diario e implemento flujos con la API de OpenAI en producción.',
     'Fuera del trabajo, vivo cerca de la playa, algo que aprovecho para practicar paddle surf siempre que puedo — es mi manera de desconectar y despejar la cabeza.',
   ],
@@ -92,11 +81,4 @@ export const siteConfig: SiteConfig = siteConfigSchema.parse({
     { title: 'Backend', items: ['Python', 'FastAPI', 'PostgreSQL', 'REST'] },
     { title: 'Y además', items: ['SEO técnico', 'Rendimiento web', 'Accesibilidad', 'CI/CD'] },
   ],
-
-  project: {
-    title: 'App de reservas',
-    description:
-      'Reserva de citas sin registro: el cliente accede a su propia reserva mediante un token opaco que recibe por email, sin necesidad de cuenta ni contraseña. Panel de administración aparte, protegido con autenticación. FastAPI + React + PostgreSQL.',
-    href: 'https://booking-app-alpha-ochre.vercel.app',
-  },
 });
