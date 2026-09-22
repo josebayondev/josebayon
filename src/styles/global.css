@@ -40,12 +40,12 @@
 [data-theme='dark'] {
   /* Croma 0: gris neutro. Con algo de croma en el azul el fondo se lee como
      "negro azulado" en pantallas frias, que es justo lo que no se quiere. */
-  --color-surface: oklch(23% 0 0);
-  --color-surface-alt: oklch(28% 0 0);
+  --color-surface: oklch(12% 0 0);
+  --color-surface-alt: oklch(17% 0 0);
   --color-content: oklch(90% 0 0);
   --color-content-muted: oklch(80% 0 0);
   --color-border: oklch(39% 0 0);
-  /* Mismo rojo, mas claro para el fondo oscuro: contraste 4.74:1 contra
+  /* Mismo rojo, mas claro para el fondo oscuro: contraste 5.7:1 contra
      --color-surface oscuro. */
   --color-accent: oklch(65% 0.2 25);
 }
